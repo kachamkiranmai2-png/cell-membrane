@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Membrane Predictor</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #eaf7ff, #f6f0ff);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+        .container {
+            width: min(900px, 94%);
+            margin: 35px auto;
+            background: white;
+            border-radius: 22px;
+            padding: 30px;
+            box-shadow: 0 12px 35px rgba(0,0,0,.12);
+        }
+        h1 {
+            text-align: center;
+            margin: 0 0 8px;
+            font-size: 32px;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 17px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        .dataset {
+            text-align: center;
+            font-size: 13px;
+            color: #5b6472;
+            margin-bottom: 25px;
+        }
+        .selection {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        select, button {
+            font-size: 16px;
+            padding: 12px 16px;
+            border-radius: 10px;
+        }
+        select {
+            min-width: 260px;
+            border: 1px solid #cbd5e1;
+            background: white;
+        }
+        button {
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            background: #2563eb;
+            color: white;
+        }
+        button:hover { opacity: .9; }
+        .reset {
+            background: #64748b;
+        }
+        .properties {
+            margin: 20px auto;
+            max-width: 650px;
+            border: 1px solid #dbe3ee;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .properties h2 {
+            margin: 0;
+            padding: 14px;
+            text-align: center;
+            background: #f1f5f9;
+            font-size: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .item {
+            padding: 13px 18px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .label { font-weight: bold; }
+        .value { float: right; }
+        .result {
+            text-align: center;
+            margin: 25px auto 10px;
+            padding: 18px;
+            border-radius: 15px;
+            max-width: 700px;
+        }
+        .yes { background: #dcfce7; color: #166534; }
+        .no { background: #fee2e2; color: #991b1b; }
+        .result-title {
+            font-size: 25px;
+            font-weight: bold;
+        }
+        .why {
+            margin-top: 15px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 28px;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 20px; margin: 15px auto; }
+            h1 { font-size: 25px; }
+            .grid { grid-template-columns: 1fr; }
+            .value { float: none; display: block; margin-top: 4px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🧬 CELL MEMBRANE PREDICTOR</h1>
+    <div class="subtitle">
+        Cell → Cell Membrane → Selective Entry &amp; Exit<br>
+        Can the substance pass through the cell membrane?
+    </div>
+
+    <div class="dataset">
+        Class 9 Dataset: Oxygen • Carbon Dioxide • Water • Glucose •
+        Sodium Ion • Potassium Ion • Sucrose
+    </div>
+
+    <form method="POST">
+        <div class="selection">
+            <label for="substance"><strong>Select Substance:</strong></label>
+            <select name="substance" id="substance" required>
+                <option value="">-- Select --</option>
+                {% for substance in substances %}
+                <option value="{{ substance }}" {% if substance == selected %}selected{% endif %}>
+                    {{ substance.replace("_", " ") }}
+                </option>
+                {% endfor %}
+            </select>
+            <button type="submit">🔍 PREDICT</button>
+            <button type="button" class="reset" onclick="window.location.href='/'">RESET</button>
+        </div>
+    </form>
+
+    {% if result %}
+    <div class="properties">
+        <h2>Substance Properties</h2>
+        <div class="grid">
+            <div class="item"><span class="label">Size:</span><span class="value">{{ result.size }}</span></div>
+            <div class="item"><span class="label">Charge:</span><span class="value">{{ result.charge }}</span></div>
+            <div class="item"><span class="label">Lipid Solubility:</span><span class="value">{{ result.lipid }}</span></div>
+            <div class="item"><span class="label">Polarity:</span><span class="value">{{ result.polarity }}</span></div>
+        </div>
+    </div>
+
+    <div class="result {% if result.can_pass == 'yes' %}yes{% else %}no{% endif %}">
+        <div class="result-title">
+            {% if result.can_pass == 'yes' %}
+                🟢 {{ result.substance }} CAN PASS
+            {% else %}
+                🔴 {{ result.substance }} CANNOT PASS
+            {% endif %}
+        </div>
+
+        <div class="why">
+            {% if result.can_pass == 'yes' %}
+                The model predicts that this substance can pass through the membrane.
+            {% else %}
+                The model predicts that this substance cannot easily pass through the membrane.
+            {% endif %}
+            <br><br>
+            <strong>Why?</strong><br>
+            {{ result.explanation }}
+        </div>
+    </div>
+    {% endif %}
+
+    <footer>
+        Educational demonstration • Cell Membrane Selective Transport
+    </footer>
+</div>
+</body>
+</html>
